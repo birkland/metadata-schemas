@@ -30,7 +30,7 @@
                 },
                 "ISSN": {
                     "$ref": "global.json#/properties/ISSN"
-                },
+                }
             }
         },
         "options": {
