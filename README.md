@@ -1,5 +1,7 @@
 # PASS metadata schemas
 
+[![Build Status](https://travis-ci.com/OA-PASS/metadata-schemas.svg?branch=master)](https://travis-ci.com/OA-PASS/metadata-schemas)
+
 This repository contains JSON schemas and example data intended to describe PASS submission metadata as per the [schemas for forms and validation](https://docs.google.com/document/d/1sLWGZR4kCvQVGv-TA5x8ny-AxL3ChBYNeFYW1eACsDw/edit) design, as well as a [schema service](https://docs.google.com/document/d/1Ki6HUYsEkKPduungp5gHmr7T_YrQUiaTipjorcSnf4s/edit) that will retrieve,
 dereference, and place in the correct order all schemas relevant to a given set of pass Repositories.
 
