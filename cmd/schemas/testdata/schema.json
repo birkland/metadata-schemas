@@ -1,0 +1,4 @@
+{
+    "$id": "http://example.org/schemas/test",
+    "foo": "bar"
+}
