@@ -1,7 +1,7 @@
 {
     "title": "JHU global schema",
     "description": "Defines all possible metadata fields for PASS deposit",
-    "$id": "https://github.com/OA-PASS/metadata-schemas/jhu/global.json",
+    "$id": "https://oa-pass.github.io/metadata-schemas/jhu/global.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "required": [

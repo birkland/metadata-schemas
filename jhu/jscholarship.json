@@ -1,7 +1,7 @@
 {
     "title": "JScholarship schema",
     "description": "JScholarship-specific metadata requirements",
-    "$id": "https://github.com/OA-PASS/metadata-schemas/jhu/jscholarship.json",
+    "$id": "https://oa-pass.github.io/metadata-schemas/jhu/jscholarship.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "definitions": {

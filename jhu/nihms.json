@@ -1,7 +1,7 @@
 {
     "title": "NIHMS schema",
     "description": "NIHMS-specific metadata requirements",
-    "$id": "https://github.com/OA-PASS/metadata-schemas/jhu/nihms.json",
+    "$id": "https://oa-pass.github.io/metadata-schemas/jhu/nihms.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "definitions": {
