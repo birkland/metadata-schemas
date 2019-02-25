@@ -8,10 +8,13 @@ go:
 
 os: 
   - linux
-  - osx
+
+services:
+  - docker
 
 install: true
 
 script:
   - go build ./...
   - go test -v ./...
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && sh ./scripts/docker-build.sh && sh ./scripts/docker-push.sh'
