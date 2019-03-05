@@ -16,5 +16,7 @@ install: true
 
 script:
   - go build ./...
-  - go test -v ./...
-  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && sh ./scripts/docker-build.sh && sh ./scripts/docker-push.sh'
+  - docker-compose build schemaservice
+  - docker-compose pull && docker-compose up -d && sh ./scripts/wait_for_fedora.sh
+  - go test -v -tags=integration ./...
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && sh ./scripts/docker-push.sh'

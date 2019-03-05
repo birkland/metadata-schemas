@@ -5,7 +5,7 @@ services:
   schemaservice:
     build: .
     image: oapass/schema-service:latest
-    container_name: schemas
+    container_name: schemaservice
     env_file: .env
     ports:
       - "${SCHEMA_SERVICE_PORT}:${SCHEMA_SERVICE_PORT}"
