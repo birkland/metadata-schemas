@@ -12,8 +12,8 @@
                 "journal-NLMTA-ID": {
                     "$ref": "global.json#/properties/journal-NLMTA-ID"
                 },
-                "ISSN": {
-                    "$ref": "global.json#/properties/ISSN"
+                "issns": {
+                    "$ref": "global.json#/properties/issns"
                 }
             }
         },
@@ -26,11 +26,11 @@
         "issn_present": {
             "type": "object",
             "required": [
-                "ISSN"
+                "issns"
             ],
             "properties": {
-                "ISSN": {
-                    "$ref": "global.json#/properties/ISSN"
+                "issns": {
+                    "$ref": "global.json#/properties/issns"
                 }
             }
         },
