@@ -7,12 +7,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-var mainOpts = struct {
-	root    string
-	user    string
-	address string
-}{}
-
 func main() {
 	app := cli.NewApp()
 	app.Name = "schemas"
