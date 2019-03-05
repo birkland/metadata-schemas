@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+
+  schemaservice:
+    build: .
+    image: oapass/schema-service:latest
+    container_name: schemaservice
+    env_file: .env
+    ports:
+      - "${SCHEMA_SERVICE_PORT}:${SCHEMA_SERVICE_PORT}"
+
+  fcrepo:
+    image: oapass/fcrepo:4.7.5-3.2-5@sha256:0bc8bcf2b4804c0c4ba11af2ad3f02ec5a24a442b6d50877148c212dc79c20d1
+    container_name: fcrepo
+    env_file: .env
+    ports:
+      - "${FCREPO_PORT}:${FCREPO_PORT}"

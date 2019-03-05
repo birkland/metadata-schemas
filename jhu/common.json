@@ -48,10 +48,5 @@
                 "$ref": "global.json#/options"
             }
         }
-    },
-    "allOf": [
-        {
-            "$ref": "#definitions/form"
-        }
-    ]
+    }
 }
