@@ -105,7 +105,7 @@ func findDeps(schema Instance) (map[string]bool, error) {
 	}
 
 	for _, ref := range analyzer.refs {
-		if uri := ref.schemaURI(); uri != "" {
+		if uri := ref.pointsIn(); uri != "" {
 			deps[uri] = true
 		}
 	}

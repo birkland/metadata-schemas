@@ -11,72 +11,6 @@ import (
 	"github.com/go-test/deep"
 )
 
-func TestMapSchemaAddGet(t *testing.T) {
-	id1 := "http://example.org/foo"
-	id2 := "http://example.org/bar"
-
-	data := []struct {
-		id   string
-		json string
-	}{
-		{id1, fmt.Sprintf(`{ "$id": "%s", "foo": "bar"}`, id1)},
-		{id2, fmt.Sprintf(`{ "$id": "%s", "foo": "bar"}`, id2)},
-	}
-
-	m := jsonschema.Map(make(map[string]jsonschema.Instance))
-	err := m.Add(strings.NewReader(data[0].json), strings.NewReader(data[1].json))
-	if err != nil {
-		t.Fatalf("Adding schema produced an error %+v", err)
-	}
-
-	if len(m) != 2 {
-		t.Fatalf("Should have mapped two schemas")
-	}
-
-	for _, d := range data {
-		_, ok := m[d.id]
-		if !ok {
-			t.Fatalf("Did not map id %s", d.id)
-		}
-
-		url, _ := url.Parse(d.id)
-
-		roundtripped, ok, err := m.GetSchema(url)
-		if !ok || err != nil {
-			t.Errorf("Could not get schema %s", d.id)
-		}
-
-		original := jsonschema.Instance(make(map[string]interface{}))
-		_ = json.Unmarshal([]byte(d.json), &original)
-
-		diffs := deep.Equal(roundtripped, original)
-		if len(diffs) > 0 {
-			t.Fatalf("Differences found between roundtripped and original json: %s", diffs)
-		}
-	}
-
-}
-
-func TestMapSchemaErrors(t *testing.T) {
-	cases := map[string]string{
-		"oId":          `{"foo": "bar"}`,
-		"idNotAString": `{"$id": {"foo": "bar"}}`,
-		"badJSON":      "{{--,",
-	}
-
-	m := jsonschema.Map(make(map[string]jsonschema.Instance))
-
-	for name, json := range cases {
-		json := json
-		t.Run(name, func(t *testing.T) {
-			err := m.Add(strings.NewReader(json))
-			if err == nil {
-				t.Fatalf("Should have thrown an error")
-			}
-		})
-	}
-}
-
 func TestDereference(t *testing.T) {
 
 	expected := parseSchema(t, `{
@@ -149,7 +83,7 @@ func TestDereference(t *testing.T) {
 		t.Fatalf("bad test json for external schema: %+v", err)
 	}
 
-	err = toTest.Dereference(externals)
+	err = jsonschema.Dereference(externals, toTest)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -175,7 +109,7 @@ func TestDereferenceParseErrors(t *testing.T) {
 		body := body
 		t.Run(name, func(t *testing.T) {
 			s := parseSchema(t, body)
-			err := s.Dereference(m)
+			err := jsonschema.Dereference(m, s)
 			if err == nil {
 				t.Fatalf("Should have thrown an error")
 			}
@@ -210,7 +144,7 @@ func TestDereferenceResolveErrors(t *testing.T) {
 	for name, fetcher := range cases {
 		fetcher := fetcher
 		t.Run(name, func(t *testing.T) {
-			err := toTest.Dereference(fetcher)
+			err := jsonschema.Dereference(fetcher, toTest)
 			if err == nil {
 				t.Fatalf("Should have thrown an error!")
 			}
@@ -219,25 +153,25 @@ func TestDereferenceResolveErrors(t *testing.T) {
 }
 
 func TestDereferencePointerError(t *testing.T) {
-	bad := parseSchema(t, `{
-		"$id": "http://example.org/cows/test.json",
-		"foo": {"$ref": "#/does/not/exist"}
-	}`)
-
-	good := parseSchema(t, `{
-		"$id": "http://example.org/cows/test.json",
-		"foo": {"$ref": "#/foo"},
-		"bar": "baz"
-	}`)
-
-	err := good.Dereference(nil)
-	if err != nil {
-		t.Fatalf("Got unexpected error %+v", err)
+	cases := map[string]jsonschema.Instance{
+		"cycle": parseSchema(t, `{
+			"$id": "http://example.org/cows/test.json",
+			"foo": {"$ref": "#/foo"},
+			"bar": "baz"
+		}`),
+		"nonexistantRef": parseSchema(t, `{
+			"$id": "http://example.org/cows/test.json",
+			"foo": {"$ref": "#/does/not/exist"}
+		}`),
 	}
 
-	err = bad.Dereference(nil)
-	if err == nil {
-		t.Fatalf("Should have seen an error")
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			err := jsonschema.Dereference(nil, c)
+			if err == nil {
+				t.Fatalf("Should have seen an error")
+			}
+		})
 	}
 }
 
