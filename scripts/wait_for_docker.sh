@@ -45,5 +45,5 @@ function wait_until_up {
     echo "$1 is up."
 }
 
-wait_until_up ${PASS_EXTERNAL_FEDORA_BASEURL}
-wait_until_up ${SCHEMA_SERVICE_URL}
+wait_until_up $PASS_EXTERNAL_FEDORA_BASEURL
+wait_until_up $SCHEMA_SERVICE_URL
