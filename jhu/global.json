@@ -116,7 +116,7 @@
                         "type": "string",
                         "title": "publication type",
                         "fieldClass": "body-text col-6 pull-left pr-0",
-                        "enum": ["print", "online"]
+                        "enum": ["Print", "Online"]
                     }
                 }
             }
