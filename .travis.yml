@@ -18,5 +18,5 @@ script:
   - go build ./...
   - docker-compose build schemaservice
   - docker-compose pull fcrepo && docker-compose up -d && bash ./scripts/wait_for_docker.sh
-  - go test -v -tags=integration ./...
+  - go test -v -tags=integration ./... || docker logs schemaservice 
   - 'if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ -z ${DOCKER_USERNAME+x} ]; then sh ./scripts/docker-push.sh; fi'
