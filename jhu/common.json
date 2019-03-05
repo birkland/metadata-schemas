@@ -22,8 +22,8 @@
                 "issue": {
                     "$ref": "global.json#/properties/issue"
                 },
-                "ISSN": {
-                    "$ref": "global.json#/properties/ISSN"
+                "issns": {
+                    "$ref": "global.json#/properties/issns"
                 },
                 "publisher": {
                     "$ref": "global.json#/properties/publisher"

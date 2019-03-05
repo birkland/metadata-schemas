@@ -98,10 +98,28 @@
             "title": "Journal issue",
             "description": "Issue number of the journal this article or manuscript was submitted to"
         },
-        "ISSN": {
-            "type": "string",
-            "title": "ISSN",
-            "description": "Comma separated ISSN numbers for the journal this article or manuscript was submitted to"
+        "issns": {
+            "type": "array",
+            "title": "ISSN information for the manuscript's journal",
+            "description": "List of ISSN numbers with optional publication type",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "title": "ISSN info",
+                "properties": {
+                    "issn": {
+                        "type": "string",
+                        "title": "ISSN ",
+                        "fieldClass": "body-text col-6 pull-left pl-0"
+                    },
+                    "pubType": {
+                        "type": "string",
+                        "title": "publication type",
+                        "fieldClass": "body-text col-6 pull-left pr-0",
+                        "enum": ["print", "online"]
+                    }
+                }
+            }
         },
         "publisher": {
             "type": "string",
@@ -164,10 +182,8 @@
                 "placeholder": "Enter issue",
                 "hidden": false
             },
-            "ISSN": {
-                "type": "text",
-                "label": "ISSN <small class=\"text-muted\">(optional)</small>",
-                "placeholder": "ISSN",
+            "issns": {
+                "label": "<div class=\"row\"><div class=\"col-6\">ISSN(s) <small class=\"text-muted\">(optional)</small> </div><div class=\"col-6 p-0\">publication type(s)</div></div>",
                 "hidden": false
             },
             "publisher": {

@@ -3,13 +3,21 @@
     "journal-title": "A Terrific Journal",
     "volume": "2",
     "issue": "4",
-    "ISSN": "1234-5678,9876-543X",
+    "issns": [
+        {
+            "issn": "1234-5678",
+            "pubType": "online"
+        },
+        {
+            "issn": "1234-5678x"
+        }
+    ],
     "publisher": "Journal Publisher Inc",
     "publicationDate": "2018",
     "abstract": "This is the abstract of the article.",
     "authors": [
         {
-            "author": "Bob Author" 
+            "author": "Bob Author"
         },
         {
             "author": "Jane Writer",
