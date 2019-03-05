@@ -1,228 +1,200 @@
 package jsonschema
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/url"
-	"path"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/xeipuuv/gojsonpointer"
-	"github.com/xeipuuv/gojsonreference"
 )
 
-const refKey = "$ref"
-
-// Fetcher fetches a parsed schema, given a URL.
-// The URL may be unclean (have hash fragments)
-type Fetcher interface {
-	GetSchema(uri *url.URL) (s Instance, ok bool, err error) // Retrieve a schema
+// finds references that are local to a doc
+var localRefs = func(r ref) bool {
+	return r.pointsIn() == ""
 }
 
-// Map is a simple map of schema URIs to schema instances, serving as a static
-// schema Fetcher
-type Map map[string]Instance
+type dereferenceState struct {
+	analyzed      map[string]Instance // nil entry for schemas in-progress
+	fetcher       Fetcher
+	localResolves int
+}
 
-// Add an un-parsed schema to the map.  This will parse it, and place it
-// into the map based on the $id present in the schema
-func (m Map) Add(src ...io.Reader) error {
-	for _, reader := range src {
-		schema := make(map[string]interface{})
-		err := json.NewDecoder(reader).Decode(&schema)
+func Dereference(fetcher Fetcher, schemas ...Instance) error {
+	state := dereferenceState{
+		analyzed: make(map[string]Instance),
+		fetcher:  fetcher,
+	}
+
+	for _, schema := range schemas {
+		if _, alreadyDone := state.analyzed[schema.ID()]; alreadyDone {
+			continue
+		}
+
+		err := state.dereference(schema)
 		if err != nil {
-			return errors.Wrapf(err, "could not decode schema instance")
+			return errors.Wrapf(err, "could not resolve references in %s", schema.ID())
 		}
-
-		i, ok := schema[idKey]
-		if !ok {
-			return fmt.Errorf("schema does not have an $id")
-		}
-
-		id, ok := i.(string)
-		if !ok {
-			return fmt.Errorf("$id is not a string")
-		}
-
-		log.Printf("Loaded schema %s", id)
-		m[id] = schema
 	}
 
 	return nil
 }
 
-// GetSchema retrieves a schema from the map, given a possibly unclean URL.
-func (m Map) GetSchema(url *url.URL) (Instance, bool, error) {
-	normalized := strings.Split(url.String(), "#")[0]
-	s, ok := m[normalized]
-	return s, ok, nil
-}
+// Resolve all references in a given schema
+func (d *dereferenceState) dereference(schema Instance) error {
 
-// Dereference replaces all $ref references with their dereferenced content
-func (s Instance) Dereference(pool Fetcher) error {
+	id := schema.ID()
 
-	proc := schemaAnalyzer{
-		doc: s,
+	if _, found := d.analyzed[id]; found {
+		// Should never happen, but just being safe
+		return fmt.Errorf("%s has been dereferenced already", id)
 	}
+	d.analyzed[id] = nil
 
-	err := proc.findRefs()
+	a, err := d.analyze(schema)
 	if err != nil {
-		return errors.Wrapf(err, "could not find references in schema")
+		return errors.Wrapf(err, "could not analyze schema %s", schema.ID())
 	}
 
-	var self map[string]interface{} = s
-	for _, ref := range proc.refs {
-		var src map[string]interface{}
-		if ref.what.HasFragmentOnly {
-			src = s
-		} else if pool != nil {
-			var ok bool
-			src, ok, err = pool.GetSchema(ref.what.GetUrl())
-			if err != nil {
-				return errors.Wrapf(err, "error fetching schema %s", ref.what.GetUrl())
-			}
-			if !ok {
-				return fmt.Errorf("no schema found %s", ref.what.GetUrl())
-			}
-		} else {
-			return fmt.Errorf("external reference found, but no schema fetcher provided: %s", ref.what.GetUrl())
-		}
+	a, err = d.resolveLocal(a)
+	if err != nil {
+		return errors.Wrapf(err, "could not resolve local references")
+	}
 
-		// Extract the value from the source (this doc, or an external one)
-		value, _, err := ref.what.GetPointer().Get(src)
+	for _, r := range a.refs {
+		err := d.resolve(r, a.doc)
 		if err != nil {
-			return errors.Wrapf(err, "could not read value at %s", ref.what.GetUrl())
-		}
-
-		// Now set the value in this doc
-		_, err = ref.where.Set(self, value)
-		if err != nil {
-			return errors.Wrapf(err, "could not insert content from %s at %s", ref.what.GetUrl(), ref.where)
+			return errors.Wrapf(err, "could not resolve external reference at %s", r.encounteredAt.String())
 		}
 	}
 
+	d.analyzed[id] = schema
 	return nil
 }
 
-type errs []error
-
-func (e errs) Error() string {
-	return fmt.Sprintf("%s", []error(e))
-}
-
-type jsonPointerPath []string
-
-func (p jsonPointerPath) next(segment string) jsonPointerPath {
-	return append(p, segment)
-}
-
-func (p jsonPointerPath) pointer() gojsonpointer.JsonPointer {
-	ptr, _ := gojsonpointer.NewJsonPointer(fmt.Sprintf("/%s", strings.Join(p, "/")))
-	return ptr
-}
-
-type ref struct {
-	what  gojsonreference.JsonReference
-	where gojsonpointer.JsonPointer
-}
-
-func (r *ref) schemaURI() string {
-	if r.what.HasFullUrl {
-		return strings.Split(r.what.GetUrl().String(), "#")[0]
-	}
-	return ""
-}
-
-type schemaAnalyzer struct {
-	doc    Instance
-	refs   []ref
-	errors errs
-}
-
-func (c *schemaAnalyzer) findRefs() error {
-	c.scanObj(nil, c.doc)
-
-	if len(c.errors) > 0 {
-		return c.errors
+// Recursively resolve all local references in a document.  We can replace any refs
+// that are terminal (do not point to content that has another local $ref).  We keep replacing the
+// terminal local refs until all are gone, or we detect a cycle.
+func (d *dereferenceState) resolveLocal(a schemaAnalyzer) (schemaAnalyzer, error) {
+	d.localResolves++
+	if d.localResolves > 100 {
+		return a, fmt.Errorf("schema resolution is stuck")
 	}
 
-	return nil
-}
+	terminal := a.take(localTerminal(a))
+	local := a.peek(localRefs)
 
-func (c *schemaAnalyzer) scanObj(p jsonPointerPath, obj map[string]interface{}) {
-	for k, v := range obj {
-		if k == refKey {
-			c.addRef(p, v)
-		} else {
-			c.scan(p.next(k), v)
+	if len(local) == 0 && len(terminal) == 0 {
+		return a, nil
+	}
+
+	if len(terminal) == 0 && len(local) > 0 {
+		return a, fmt.Errorf("Cycle detected in local references in %s", a.doc.ID())
+	}
+
+	for _, r := range terminal {
+		err := d.resolve(r, a.doc)
+		if err != nil {
+			return a, errors.Wrapf(err, "could not resolve reference %s in %s", r.encounteredAt.String(), a.doc.ID())
 		}
 	}
+
+	// re-analyze and do another pass.
+	nextRound, _ := d.analyze(a.doc)
+	return d.resolveLocal(nextRound)
 }
 
-func (c *schemaAnalyzer) scan(p jsonPointerPath, something interface{}) {
-	if something == nil {
-		return
-	}
+// Resolve a single $ref in a given schema instance
+func (d *dereferenceState) resolve(r ref, inDoc Instance) (err error) {
 
-	switch v := something.(type) {
-	case map[string]interface{}:
-		c.scanObj(p, v)
-	case []interface{}:
-		c.scanList(p, v)
+	var src map[string]interface{}
+
+	switch r.pointsIn() {
+	case "":
+		src = inDoc
 	default:
-	}
-}
-
-func (c *schemaAnalyzer) scanList(p jsonPointerPath, list []interface{}) {
-	for i, v := range list {
-		c.scan(p.next(strconv.Itoa(i)), v)
-	}
-}
-
-func (c *schemaAnalyzer) addRef(p jsonPointerPath, refContent interface{}) {
-
-	refString, ok := refContent.(string)
-	if !ok {
-		c.errors = append(c.errors, fmt.Errorf("expected to find a string at %s, instead found %s", p.pointer(), refContent))
-		return
-	}
-
-	jsonref, err := gojsonreference.NewJsonReference(refString)
-	if err != nil {
-		c.errors = append(c.errors,
-			errors.Wrapf(err, "could not parse json reference at %s with content %s", p.pointer(), refString))
-		return
-	}
-
-	// Ref is of the form foo.json#/path.  So we need to make foo.json absolute by taking the base
-	// of $id
-	if !jsonref.HasFullUrl && jsonref.HasUrlPathOnly && !jsonref.HasFragmentOnly {
-		id, ok := c.doc["$id"]
-		if !ok {
-			c.errors = append(c.errors, fmt.Errorf("found relative reference %s, but doc does not have an ID", jsonref.GetUrl()))
-			return
-		}
-
-		if _, ok := id.(string); !ok {
-			c.errors = append(c.errors, fmt.Errorf("$id is not a string"))
-			return
-		}
-
-		uri, err := url.Parse(id.(string))
+		src, err = d.getSchema(r.pointsIn())
 		if err != nil {
-			c.errors = append(c.errors, errors.Wrap(err, "$id is not a well-formed url"))
-			return
+			return errors.Wrapf(err, "error resolving reference in schema %s", inDoc.ID())
 		}
-		uri.Path = path.Join(path.Dir(uri.Path), jsonref.GetUrl().Path)
-
-		absoluteRef, _ := gojsonreference.NewJsonReference(fmt.Sprintf("%s#%s", uri.String(), jsonref.GetUrl().Fragment))
-
-		c.refs = append(c.refs, ref{what: absoluteRef, where: p.pointer()})
-		return
 	}
 
-	c.refs = append(c.refs, ref{what: jsonref, where: p.pointer()})
+	// Extract the value from the source (this doc, or an external one)
+	if r.pointsTo.GetPointer().String() == r.encounteredAt.String() && r.pointsIn() == "" {
+		return fmt.Errorf("Cycle detected: %s points to itself in %s", r.encounteredAt.String(), inDoc.ID())
+	}
+	value, _, err := r.pointsTo.GetPointer().Get(src)
+	if err != nil {
+		return errors.Wrapf(err, "could not read value at %s", r.pointsTo.GetUrl())
+	}
+
+	// Now set the value in this doc
+	_, err = r.encounteredAt.Set(map[string]interface{}(inDoc), value)
+	if err != nil {
+		return errors.Wrapf(err, "could not insert content from %s at %s", r.pointsTo.GetUrl(), r.encounteredAt)
+	}
+
+	return nil
+}
+
+// Finds references that are local and terminal (i.e. do not contain any other $refs)
+func localTerminal(a schemaAnalyzer) func(ref) bool {
+	return func(r ref) bool {
+
+		if r.pointsIn() != "" {
+			return false
+		}
+
+		// Scan through all refs.  If we encounter a candidate that occurs beneath the place this
+		// ref points to in the doc, then this ref is not terminal, as it contains a local ref inside it.
+		refLoc := r.pointsTo.GetPointer().String()
+		for _, t := range a.refs {
+			candidate := t.encounteredAt.String()
+			if strings.HasPrefix(candidate, refLoc) && candidate != refLoc && t.pointsIn() == "" {
+				return false
+			}
+		}
+
+		return true
+	}
+}
+
+// analyze a schema and parse its references
+func (d *dereferenceState) analyze(schema Instance) (schemaAnalyzer, error) {
+
+	analyzer := schemaAnalyzer{
+		doc: schema,
+	}
+
+	return analyzer, analyzer.findRefs()
+}
+
+// get a schema for a given URI.  If we have not encountered it yet, fetch and dereference it
+// first.
+func (d *dereferenceState) getSchema(schemaUri string) (Instance, error) {
+	if a, ok := d.analyzed[schemaUri]; ok {
+		if a == nil {
+			return nil, fmt.Errorf("Cycle detected in schema that references %s", schemaUri)
+		}
+
+		return a, nil
+	}
+
+	if d.fetcher == nil {
+		return nil, fmt.Errorf("No schema fetcher given")
+	}
+
+	uri, err := url.Parse(schemaUri)
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not parse schema uri %s", schemaUri)
+	}
+
+	instance, ok, err := d.fetcher.GetSchema(uri)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error fetching %s", schemaUri)
+	}
+	if !ok {
+		return nil, fmt.Errorf(`could not find schema "%s"`, schemaUri)
+	}
+
+	return instance, d.dereference(instance)
 }
