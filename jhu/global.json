@@ -54,14 +54,10 @@
                 "title": "Author",
                 "properties": {
                     "author": {
-                        "type": "string",
-                        "title": "Name",
-                        "fieldClass": "body-text col-6 pull-left pl-0"
+                        "type": "string"
                     },
                     "orcid": {
-                        "type": "string",
-                        "title": "ORCiD",
-                        "fieldClass": "body-text col-6 pull-left pr-0"
+                        "type": "string"
                     }
                 }
             }
@@ -109,13 +105,11 @@
                 "properties": {
                     "issn": {
                         "type": "string",
-                        "title": "ISSN ",
-                        "fieldClass": "body-text col-6 pull-left pl-0"
+                        "title": "ISSN "
                     },
                     "pubType": {
                         "type": "string",
                         "title": "publication type",
-                        "fieldClass": "body-text col-6 pull-left pr-0",
                         "enum": ["Print", "Online"]
                     }
                 }
@@ -157,62 +151,97 @@
                 "placeholder": "Enter the manuscript title",
                 "rows": 2,
                 "cols": 100,
-                "hidden": false
+                "hidden": false,
+                "order": 1
             },
             "journal-title": {
                 "type": "text",
                 "label": "Journal Title <small class=\"text-muted\">(required)</small>",
                 "placeholder": "Enter the journal title",
-                "hidden": false
+                "hidden": false,
+                "order": 2
             },
             "journal-NLMTA-ID": {
                 "type": "text",
                 "label": "Journal NLMTA ID <small class=\"text-muted\">(optional)</small>",
-                "placeholder": "nlmta"
+                "placeholder": "nlmta",
+                "order": 3
             },
             "volume": {
                 "type": "text",
                 "label": "Volume  <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter the volume",
-                "hidden": false
+                "hidden": false,
+                "order": 4
             },
             "issue": {
                 "type": "text",
                 "label": "Issue  <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter issue",
-                "hidden": false
+                "hidden": false,
+                "order": 5
             },
             "issns": {
-                "label": "<div class=\"row\"><div class=\"col-6\">ISSN(s) <small class=\"text-muted\">(optional)</small> </div><div class=\"col-6 p-0\">publication type(s)</div></div>",
-                "hidden": false
+                "label": "ISSN Information",
+                "hidden": false,
+                "items": {
+                    "fields": {
+                        "issn": {
+                            "label": "ISSN",
+                            "fieldClass": "body-text col-6 pull-left pl-0"
+                        },
+                        "pubType": {
+                            "label": "Publication Type",
+                            "fieldClass": "body-text col-6 pull-left pl-0"
+                        }
+                    }
+                },
+                "order": 6
             },
             "publisher": {
                 "type": "text",
                 "label": "Publisher <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter the Publisher",
-                "hidden": false
+                "hidden": false,
+                "order": 7
             },
             "publicationDate": {
                 "type": "date",
                 "label": "Publication Date  <small class=\"text-muted\">(optional)</small>",
-                "hidden": false
+                "hidden": false,
+                "order": 8
             },
             "abstract": {
                 "type": "textarea",
                 "label": "Abstract <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter abstract",
                 "fieldClass": "clearfix",
-                "hidden": false
+                "hidden": false,
+                "order": 9
             },
             "authors": {
                 "label": "<div class=\"row\"><div class=\"col-6\">Author(s) <small class=\"text-muted\">(optional)</small> </div><div class=\"col-6 p-0\">ORCID(s)</div></div>",
-                "hidden": false
+                "hidden": false,
+                "items": {
+                    "fields": {
+                        "author": {
+                            "label": "Name",
+                            "fieldClass": "body-text col-6 pull-left pl-0"
+                        },
+                        "orcid": {
+                            "label": "ORCiD",
+                            "fieldClass": "body-text col-6 pull-left pr-0"
+                        }
+                    }
+                },
+                "order": 10
             },
             "under-embargo": {
                 "type": "checkbox",
                 "rightLabel": "The material being submitted is published under an embargo.",
                 "fieldClass": "m-0 mt-4",
-                "hidden": false
+                "hidden": false,
+                "order": 11
             },
             "Embargo-end-date": {
                 "type": "date",
@@ -226,7 +255,8 @@
                 "picker": {
                     "format": "MM/DD/YY",
                     "allowInputToggle": true
-                }
+                },
+                "order": 12
             }
         }
     }
