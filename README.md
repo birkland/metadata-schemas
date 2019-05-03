@@ -70,7 +70,7 @@ Building the schema service requires go 1.11 or later.
 
 The schema service may be built by running:
 
-    go build ./cmd/schemas
+    go build ./cmd/pass-schema-service
 
 .. which will create an executable in the current directory.  `go install ./cmd/schemas` may be used instead, which will install the binary to your `${GOPATH/bin}`.  If you have that in your `$PATH`, this is particularly convenient for building and running cli commands.
 
@@ -78,15 +78,15 @@ The schema service may be built by running:
 
 To get a list of command line options, do 
 
-    schemas help serve
+    pass-schema-service help serve
 
 To run the schema service,
 
-    schemas serve /path/to/schemas
+    pass-schema-service serve /path/to/schemas
 
 where `/path/to/schemas` is a directory, or files(s) containing JSON schemas.  This statically loads the set of schemas this service may return.  For example:
 
-    $ ./schemas serve jhu/
+    $ ./pass-schema-service serve jhu/
     2019/02/21 16:40:40 Loaded schema https://github.com/OA-PASS/metadata-schemas/jhu/common.json
     2019/02/21 16:40:40 Loaded schema https://github.com/OA-PASS/metadata-schemas/jhu/global.json
     2019/02/21 16:40:40 Loaded schema https://github.com/OA-PASS/metadata-schemas/jhu/jscholarship.json
@@ -99,12 +99,12 @@ This output shows the random port the server is listening on, and lists the sche
 
 The help page describes the possible commandline options.  Each option has a corresponding environment variable that may be used instead:
 
-    $ ./schemas help serve
+    $ ./pass-schema-service help serve
     NAME:
-        schemas serve - Sereve the PASS schema service over http
+        pass-schema-service serve - Sereve the PASS schema service over http
 
     USAGE:
-        schemas serve [command options] [ file | dir ] ...
+        pass-schema-service serve [command options] [ file | dir ] ...
 
     DESCRIPTION:
 
@@ -123,5 +123,16 @@ The help page describes the possible commandline options.  Each option has a cor
 Command line options have a short form (`-i`) or a long form (`--internal`), which may be user interchangably.  For example, the following
 will run the schema service on port 8080, and user the username `myUser` and passeord `foo` for retrieving repository entities from the Fedora
 
-    env SCHEMA_SERVICE_PORT=8080 schemas serve -u myUser --password foo  /path/to/schemas
+    env SCHEMA_SERVICE_PORT=8080 pass-schema-service serve -u myUser --password foo  /path/to/schemas
 
+## Updating and deploying live schemas
+
+All schemas in the `schemas` directory are served by github pages.  When a schema changes, it needs to be deployed to the `gh-pages` branch to be served by http:
+
+    git subtree push --prefix schemas origin gh-pages
+
+In addition, the go library exports the schemas and makes them statically available for validation.  To bake new schemas into the code, do:
+
+    go generate ./...
+
+Tests will fail if schemas are changed, but this step is not run
