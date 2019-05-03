@@ -1,0 +1,32 @@
+{
+    "title": "JScholarship schema",
+    "description": "JScholarship-specific metadata requirements",
+    "$id": "https://oa-pass.github.io/metadata-schemas/jhu/jscholarship.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+        "form": {
+            "title": "Johns Hopkins - JScholarship <br><p class='lead text-muted'>Deposit requirements for JH's institutional repository JScholarship</p>",
+            "type": "object",
+            "required": [
+                "authors"
+            ],
+            "properties": {
+                "authors": {
+                    "$ref": "global.json#/properties/authors"
+                }
+            }
+        },
+        "options": {
+            "$ref": "global.json#/options"
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "global.json#"
+        },
+        {
+            "$ref": "#/definitions/form"
+        }
+    ]
+}
