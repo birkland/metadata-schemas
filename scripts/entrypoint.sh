@@ -4,4 +4,4 @@ printf "\n**** Begin Environment Variable Dump ****\n\n"
 printenv | sort
 printf "\n**** End Environment Variable Dump ****\n\n"
 
-./schemas serve /*.json
+./pass-schema-service serve *.json

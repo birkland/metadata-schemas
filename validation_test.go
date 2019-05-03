@@ -11,7 +11,7 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-const schemaDir = "jhu"
+const schemaDir = "schemas/jhu"
 const exampleData = "examples/jhu/full.json"
 
 func TestSchemaValidity(t *testing.T) {
