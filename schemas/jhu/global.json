@@ -127,7 +127,8 @@
             "description": "Publisher of the journal this article or manuscript was submitted to"
         },
         "publicationDate": {
-            "format": "string",
+            "type": "string",
+            "format": "date",
             "title": "Publication Date",
             "description": "Publication date of the journal or article this manuscript was submitted to",
             "$comment": "This was formerly date-time format, but that appears too precise for values like 'Summer 2018'"
