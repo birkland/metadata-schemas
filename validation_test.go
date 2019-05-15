@@ -12,35 +12,55 @@ import (
 )
 
 const schemaDir = "schemas/jhu"
-const exampleData = "examples/jhu/full.json"
 
 func TestSchemaValidity(t *testing.T) {
 	schemaMap := loadSchemas(t)
 
-	// Load the test data
-	testdataFile, err := os.Open(exampleData)
+	cases := map[string]bool{
+		"examples/jhu/full.json":                         true,
+		"testdata/valid/nlmta-but-no-pubtype.json":       true,
+		"testdata/valid/no-nlmta-but-has-a-pubtype.json": true,
+		"testdata/invalid/no-nlmta-or-pubtype.json":      false,
+	}
+
+	for filename, shouldBeValid := range cases {
+		filename := filename
+		shouldBeValid := shouldBeValid
+		t.Run(filename, func(t *testing.T) {
+			var hasExpectedFailure bool
+			for id, schema := range schemaMap {
+				toTest := gojsonschema.NewGoLoader(schema)
+
+				result, err := gojsonschema.Validate(toTest, loadTestSchema(t, filename))
+				if err != nil {
+					t.Fatalf("Error validating against schema %s: %+v", id, err)
+				}
+
+				if shouldBeValid && !result.Valid() {
+					for _, err := range result.Errors() {
+						t.Logf("- %s\n", err)
+					}
+					t.Fatalf("Schema validation for %s failed!", id)
+				} else if !shouldBeValid && !result.Valid() {
+					hasExpectedFailure = true
+				}
+			}
+
+			if !shouldBeValid && !hasExpectedFailure {
+				t.Fatalf("schema passed validation, but should have failed")
+			}
+		})
+	}
+}
+
+func loadTestSchema(t *testing.T, filename string) gojsonschema.JSONLoader {
+	testdataFile, err := os.Open(filename)
 	if err != nil {
 		t.Fatalf("Could not open example data")
 	}
 	defer testdataFile.Close()
 	body, _ := ioutil.ReadAll(testdataFile)
-	testData := gojsonschema.NewBytesLoader(body)
-
-	for id, schema := range schemaMap {
-		toTest := gojsonschema.NewGoLoader(schema)
-
-		result, err := gojsonschema.Validate(toTest, testData)
-		if err != nil {
-			t.Fatalf("Error validating against schema %s: %+v", id, err)
-		}
-
-		if !result.Valid() {
-			for _, err := range result.Errors() {
-				t.Logf("- %s\n", err)
-			}
-			t.Fatalf("Schema validation for %s failed!", id)
-		}
-	}
+	return gojsonschema.NewBytesLoader(body)
 }
 
 func loadSchemas(t *testing.T) jsonschema.Map {
