@@ -25,12 +25,24 @@
         },
         "issn_present": {
             "type": "object",
-            "required": [
-                "issns"
-            ],
             "properties": {
                 "issns": {
-                    "$ref": "global.json#/properties/issns"
+                    "type": "array",
+                    "contains": {
+                        "type": "object",
+                        "required": [
+                            "issn",
+                            "pubType"
+                        ],
+                        "properties": {
+                            "issn": {
+                                "type": "string"
+                            },
+                            "pubType": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             }
         },
