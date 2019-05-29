@@ -189,17 +189,22 @@
                 "order": 5
             },
             "issns": {
-                "label": "ISSN Information",
+                "label": "<div>ISSN Information</div><hr/>",
                 "hidden": false,
+                "fieldClass": "",
                 "items": {
+                    "label": "<span class=\"d-none\"></span>",
+                    "fieldClass": "row",
                     "fields": {
                         "issn": {
                             "label": "ISSN",
-                            "fieldClass": "body-text col-6 pull-left pl-0"
+                            "fieldClass": "body-text col-6 pull-left "
                         },
                         "pubType": {
                             "label": "Publication Type",
-                            "fieldClass": "body-text col-6 pull-left pl-0"
+                            "fieldClass": "body-text col-6 pull-left md-pubtype",
+                            "vertical": false,
+                            "removeDefaultNone": true
                         }
                     }
                 },
@@ -227,9 +232,10 @@
                 "order": 9
             },
             "authors": {
-                "label": "<div class=\"row\"><div class=\"col-6\">Author(s) <small class=\"text-muted\">(optional)</small> </div><div class=\"col-6 p-0\">ORCID(s)</div></div>",
+                "label": "<div>Authors</div><hr/>",
                 "hidden": false,
                 "items": {
+                    "label": "<span class=\"d-none\"></span>",
                     "fields": {
                         "author": {
                             "label": "Name",
