@@ -65,7 +65,8 @@
                     "orcid": {
                         "type": "string"
                     }
-                }
+                },
+		"required": ["author"]
             }
         },
         "doi": {
