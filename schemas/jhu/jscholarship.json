@@ -8,9 +8,6 @@
         "form": {
             "title": "Johns Hopkins - JScholarship <br><p class='lead text-muted'>Deposit requirements for JH's institutional repository JScholarship</p>",
             "type": "object",
-            "required": [
-                "authors"
-            ],
             "properties": {
                 "authors": {
                     "$ref": "global.json#/properties/authors"
