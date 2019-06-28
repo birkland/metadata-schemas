@@ -62,6 +62,8 @@ The schema service is an http service that accepts a list of PASS [repository](h
 For each repository, the schema service will retrieve the list of schemas relevant to the repository, place that list in the correct order (so
 that schemas that provide the most dependencies are displayed first), and resolves all `$ref` references that might appear in the schema.
 
+If a `merge` query parameter is provided (with any value, e.g. `?merge=true`), then all schemas will be merged into a single union schema.
+
 The result is an `application/json` response that contains a JSON list of schemas.
 
 ### building
@@ -119,6 +121,7 @@ The help page describes the possible commandline options.  Each option has a cor
         --username value, -u value  Username for basic auth to Fedora [$PASS_FEDORA_USER]
         --password value, -p value  Password for basic auth to Fedora [$PASS_FEDORA_PASSWORD]
         --port value                Port for the schema service http endpoint (default: 0) [$SCHEMA_SERVICE_PORT]
+        --merge, -m                 Always merge result schemas into a single one [$SCHEMA_SERVICE_MERGE]
 
 Command line options have a short form (`-i`) or a long form (`--internal`), which may be user interchangably.  For example, the following
 will run the schema service on port 8080, and user the username `myUser` and passeord `foo` for retrieving repository entities from the Fedora
