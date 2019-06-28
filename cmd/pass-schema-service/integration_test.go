@@ -25,11 +25,42 @@ func TestFedoraIntegration(t *testing.T) {
 
 	setupFedora(t, client)
 
-	post, _ := http.NewRequest(http.MethodPost, schemaServiceURI(), requestBody(t,
-		fedoraURI(nihmsPath),
-		fedoraURI(j10pPath),
-	))
+	schemas := invokeSchemaService(t, client, false, fedoraURI(nihmsPath), fedoraURI(j10pPath))
 
+	//verify we have three schemas returned (common, j10p, and nihms)
+	if len(schemas) != 3 {
+		t.Fatalf("Wrong number of schemas, got %d", len(schemas))
+	}
+
+	// Finally, verify the ordering of results
+	expectedSchemas := []string{
+		"https://oa-pass.github.io/metadata-schemas/jhu/common.json",
+		"https://oa-pass.github.io/metadata-schemas/jhu/nihms.json",
+		"https://oa-pass.github.io/metadata-schemas/jhu/jscholarship.json",
+	}
+
+	for i, schema := range schemas {
+		if schema.ID() != expectedSchemas[i] {
+			t.Fatalf("Saw %s as schema %d, but should have seen %s", schema.ID(), i, expectedSchemas[i])
+		}
+	}
+}
+
+func TestMergeSchemas(t *testing.T) {
+	client := &http.Client{}
+
+	setupFedora(t, client)
+
+	schemas := invokeSchemaService(t, client, true, fedoraURI(nihmsPath), fedoraURI(j10pPath))
+
+	//verify we have only one schema
+	if len(schemas) != 1 {
+		t.Fatalf("Wrong number of schemas, got %d", len(schemas))
+	}
+}
+
+func invokeSchemaService(t *testing.T, client *http.Client, merge bool, repos ...string) []jsonschema.Instance {
+	post, _ := http.NewRequest(http.MethodPost, schemaServiceURI(merge), requestBody(t, repos...))
 	post.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(post)
@@ -53,23 +84,7 @@ func TestFedoraIntegration(t *testing.T) {
 	// Unmarshal into JSON and verify we have three schemas returned (common, j10p, and nihms)
 	var schemas []jsonschema.Instance
 	_ = json.Unmarshal(body, &schemas)
-	if len(schemas) != 3 {
-		t.Fatalf("Wrong number of schemas, got %d", len(schemas))
-	}
-
-	// Finally, verify the ordering of results
-	expectedSchemas := []string{
-		"https://oa-pass.github.io/metadata-schemas/jhu/common.json",
-		"https://oa-pass.github.io/metadata-schemas/jhu/nihms.json",
-		"https://oa-pass.github.io/metadata-schemas/jhu/jscholarship.json",
-	}
-
-	for i, schema := range schemas {
-		if schema.ID() != expectedSchemas[i] {
-			t.Fatalf("Saw %s as schema %d, but should have seen %s", schema.ID(), i, expectedSchemas[i])
-		}
-	}
-
+	return schemas
 }
 
 func requestBody(t *testing.T, uris ...string) io.Reader {
@@ -94,7 +109,7 @@ func authz(r *http.Request) {
 	r.SetBasicAuth(username, passwd)
 }
 
-func schemaServiceURI() string {
+func schemaServiceURI(doMerge bool) string {
 	port, ok := os.LookupEnv("SCHEMA_SERVICE_PORT")
 	if !ok {
 		port = "8086"
@@ -105,7 +120,11 @@ func schemaServiceURI() string {
 		host = "localhost"
 	}
 
-	return fmt.Sprintf("http://%s:%s", host, port)
+	if !doMerge {
+		return fmt.Sprintf("http://%s:%s", host, port)
+	}
+
+	return fmt.Sprintf("http://%s:%s?merge=true", host, port)
 }
 
 func fedoraURI(uripath string) string {
