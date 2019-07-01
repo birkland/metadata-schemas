@@ -179,7 +179,7 @@ func parseSchema(t *testing.T, jsonString string) jsonschema.Instance {
 	instance := jsonschema.Instance(make(map[string]interface{}))
 	err := json.Unmarshal([]byte(jsonString), &instance)
 	if err != nil {
-		t.Fatalf("could not parse json: %+v", err)
+		t.Fatalf("could not parse json: %+v\n%s", err, jsonString)
 	}
 
 	return instance

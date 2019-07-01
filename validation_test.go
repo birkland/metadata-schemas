@@ -1,4 +1,4 @@
-package metadata_schemas
+package metadata_schemas_test
 
 import (
 	"io/ioutil"
@@ -91,6 +91,13 @@ func loadSchemas(t *testing.T) jsonschema.Map {
 	if err != nil {
 		t.Fatalf("Error dereferencing schemas %+v", err)
 	}
+
+	// Finally, add a union schema that merges them all (making sure that validations are expected against that too)
+	merged, err := jsonschema.Merge(schemas)
+	if err != nil {
+		t.Fatalf("Error merging schemas: %+v", err)
+	}
+	schemaMap["merged"] = merged
 
 	return schemaMap
 }

@@ -19,6 +19,7 @@ var serveOpts = struct {
 	username       string
 	passwd         string
 	port           int
+	forceMerge     bool
 }{}
 
 var serve cli.Command = cli.Command{
@@ -60,6 +61,12 @@ var serve cli.Command = cli.Command{
 			Usage:       "Port for the schema service http endpoint",
 			EnvVar:      "SCHEMA_SERVICE_PORT",
 			Destination: &serveOpts.port,
+		},
+		cli.BoolFlag{
+			Name:        "merge, m",
+			Usage:       "Always merge result schemas into a single one",
+			EnvVar:      "SCHEMA_SERVICE_MERGE",
+			Destination: &serveOpts.forceMerge,
 		},
 	},
 
@@ -142,6 +149,17 @@ func handlePost(schemaService *web.SchemaService, w http.ResponseWriter, r *http
 		log.Printf("Error processing schemas: %s", err)
 		http.Error(w, "server error!", http.StatusInternalServerError)
 		return
+	}
+
+	if merge := r.FormValue("merge"); merge != "" || serveOpts.forceMerge {
+		merged, err := jsonschema.Merge(schemas)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Could not merge schemas: %s", err), http.StatusConflict)
+			log.Printf("Error merging schemas: %s", err)
+			return
+		}
+
+		schemas = []jsonschema.Instance{merged}
 	}
 
 	encoder := json.NewEncoder(w)
