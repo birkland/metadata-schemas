@@ -62,7 +62,7 @@ The schema service is an http service that accepts a list of PASS [repository](h
 For each repository, the schema service will retrieve the list of schemas relevant to the repository, place that list in the correct order (so
 that schemas that provide the most dependencies are displayed first), and resolves all `$ref` references that might appear in the schema.
 
-If a `merge` query parameter is provided (with any value, e.g. `?merge=true`), then all schemas will be merged into a single union schema.
+If a `merge` query parameter is provided (with any value, e.g. `?merge=true`), then all schemas will be merged into a single union schema. If the service is unable to merge schemas together, it will respond with `409 Conflict` status. In this case, a client can issue a request without the `merge` query parameter to get the un-merged list of schemas.
 
 The result is an `application/json` response that contains a JSON list of schemas.
 
