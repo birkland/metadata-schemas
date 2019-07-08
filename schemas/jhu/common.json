@@ -44,6 +44,9 @@
                     "$ref": "global.json#/properties/Embargo-end-date"
                 }
             },
+            "dependencies": {
+                "Embargo-end-date": ["under-embargo"]
+            },
             "options": {
                 "$ref": "global.json#/options"
             }

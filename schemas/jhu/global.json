@@ -150,6 +150,9 @@
             "description": "journal volume this article or manuscript was published in"
         }
     },
+    "dependencies": {
+        "Embargo-end-date": ["under-embargo"]
+    },
     "options": {
         "fields": {
             "title": {
@@ -269,7 +272,10 @@
                     "format": "MM/DD/YY",
                     "allowInputToggle": true
                 },
-                "order": 12
+                "order": 12,
+                "dependencies": {
+                    "under-embargo": true
+                }
             }
         }
     }
