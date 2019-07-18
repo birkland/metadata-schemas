@@ -20,13 +20,12 @@
             "type": "object",
             "title": "Agreements to deposit conditions",
             "description": "Maps repository keys to the text or links containing the agreements accepted by the submitter",
-            "$comment": "This was formerly known as 'embargo', available only for JScholarship metadata",
             "patternProperties": {
                 "^.+$": {
                     "type": "string",
                     "title": "Agreement",
                     "description": "Text or link agreed to for the given repository key",
-                    "$comment": "Example: {'jScholarship': 'http://example.org/agreementText'}"
+                    "$comment": "Example: {'dash': 'http://example.org/agreementText'}"
                 }
             }
         },
@@ -133,6 +132,13 @@
             "description": "Publication date of the journal or article this manuscript was submitted to",
             "$comment": "This was formerly date-time format, but that appears too precise for values like 'Summer 2018'"
         },
+        "publicationType": {
+            "type" : "string",
+            "title": "Publication Type",
+            "default": "Journal",
+            "description": "Type of publication",
+            "enum": ["Journal"]
+        },
         "title": {
             "type": "string",
             "title": "Article / Manuscript Title",
@@ -171,25 +177,31 @@
                 "hidden": false,
                 "order": 2
             },
+            "publicationType": {
+                "type": "select",
+                "label": "Publication Type <small class=\"text-muted\">(optional)</small>",
+                "hidden": false,
+                "order": 3
+            },
             "journal-NLMTA-ID": {
                 "type": "text",
                 "label": "Journal NLMTA ID <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "nlmta",
-                "order": 3
+                "order": 4
             },
             "volume": {
                 "type": "text",
                 "label": "Volume  <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter the volume",
                 "hidden": false,
-                "order": 4
+                "order": 5
             },
             "issue": {
                 "type": "text",
                 "label": "Issue  <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter issue",
                 "hidden": false,
-                "order": 5
+                "order": 6
             },
             "issns": {
                 "label": "<div>ISSN Information</div><hr/>",
@@ -211,20 +223,20 @@
                         }
                     }
                 },
-                "order": 6
+                "order": 7
             },
             "publisher": {
                 "type": "text",
                 "label": "Publisher <small class=\"text-muted\">(optional)</small>",
                 "placeholder": "Enter the Publisher",
                 "hidden": false,
-                "order": 7
+                "order": 8
             },
             "publicationDate": {
                 "type": "date",
                 "label": "Publication Date  <small class=\"text-muted\">(optional)</small>",
                 "hidden": false,
-                "order": 8
+                "order": 9
             },
             "abstract": {
                 "type": "textarea",
@@ -232,7 +244,7 @@
                 "placeholder": "Enter abstract",
                 "fieldClass": "clearfix",
                 "hidden": false,
-                "order": 9
+                "order": 10
             },
             "authors": {
                 "label": "<div>Authors</div><hr/>",
@@ -250,14 +262,14 @@
                         }
                     }
                 },
-                "order": 10
+                "order": 11
             },
             "under-embargo": {
                 "type": "checkbox",
                 "rightLabel": "The material being submitted is published under an embargo.",
                 "fieldClass": "m-0 mt-4",
                 "hidden": false,
-                "order": 11
+                "order": 12
             },
             "Embargo-end-date": {
                 "type": "date",
@@ -272,7 +284,7 @@
                     "format": "MM/DD/YY",
                     "allowInputToggle": true
                 },
-                "order": 12,
+                "order": 13,
                 "dependencies": {
                     "under-embargo": true
                 }
