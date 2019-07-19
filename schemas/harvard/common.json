@@ -1,7 +1,7 @@
 {
     "title": "JHU common schema",
     "description": "Enumerates the common properies required by most repositories",
-    "$id": "https://oa-pass.github.io/harvard-metadata-schemas/harvard/common.json",
+    "$id": "https://oa-pass.github.io/metadata-schemas/harvard/common.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "definitions": {
