@@ -80,6 +80,26 @@
             "title": "Embargo end date",
             "description": "Date at which the article or manuscript may be made public"
         },
+        "firstAuthorAffiliation": {
+            "type": "string",
+            "title": "First Author Affiliation",
+            "description": "School with which the first author is affiliated",
+            "enum": [
+                "Faculty of Arts and Sciences",
+                "Harvard Graduate School of Design",
+                "Harvard Graduate School of Education",
+                "Harvard Business School",
+                "Harvard Divinity School",
+                "Harvard Kennedy School",
+                "Harvard Law School",
+                "Harvard Medical School",
+                "Harvard T.H. Chan School of Public Health",
+                "Ash Center for Democratic Governance and Innovation",
+                "Berkman Klein Center for Internet & Society",
+                "Harvard University Center for the Environment",
+                "Harvard-China Project on Energy, Economy, and Environment"
+            ]
+        },
         "journal-NLMTA-ID": {
             "type": "string",
             "title": "NTMLA",
@@ -264,12 +284,18 @@
                 },
                 "order": 11
             },
+            "firstAuthorAffiliation": {
+                "type": "select",
+                "label": "First Author Affiliation <small class=\"text-muted\">(required)</small>",
+                "hidden": false,
+                "order": 12
+            },
             "under-embargo": {
                 "type": "checkbox",
                 "rightLabel": "The material being submitted is published under an embargo.",
                 "fieldClass": "m-0 mt-4",
                 "hidden": false,
-                "order": 12
+                "order": 13
             },
             "Embargo-end-date": {
                 "type": "date",
@@ -284,7 +310,7 @@
                     "format": "MM/DD/YY",
                     "allowInputToggle": true
                 },
-                "order": 13,
+                "order": 14,
                 "dependencies": {
                     "under-embargo": true
                 }
