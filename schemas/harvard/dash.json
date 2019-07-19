@@ -26,6 +26,9 @@
                 },
                 "publicationDate": {
                     "$ref": "global.json#/properties/publicationDate"
+                },
+                "publicationType": {
+                    "$ref": "global.json#/properties/publicationType"
                 }
             }
         },
