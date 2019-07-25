@@ -12,7 +12,8 @@
                 "authors": {
                     "$ref": "global.json#/properties/authors"
                 }
-            }
+            },
+            "required": ["authors"]
         },
         "options": {
             "$ref": "global.json#/options"
