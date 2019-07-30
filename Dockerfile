@@ -4,7 +4,7 @@ RUN apk update && apk add --no-cache git
 
 WORKDIR /root
 COPY . .
-RUN CGO_ENABLED=0 go build ./cmd/pass-schema-service
+RUN CGO_ENABLED=0 GOPROXY=https://proxy.golang.org/ go build ./cmd/pass-schema-service
 
 FROM alpine:3.9
 COPY --from=builder /root/pass-schema-service /root/scripts /
