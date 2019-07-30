@@ -1,0 +1,320 @@
+{
+    "title": "JHU global schema",
+    "description": "Defines all possible metadata fields for PASS deposit",
+    "$id": "https://oa-pass.github.io/metadata-schemas/harvard/global.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+        "$schema",
+        "title",
+        "journal-title"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "title": "JSON schema",
+            "description": "The JSON schema that applies to the resulting metadata blob"
+        },
+        "agreements": {
+            "type": "object",
+            "title": "Agreements to deposit conditions",
+            "description": "Maps repository keys to the text or links containing the agreements accepted by the submitter",
+            "patternProperties": {
+                "^.+$": {
+                    "type": "string",
+                    "title": "Agreement",
+                    "description": "Text or link agreed to for the given repository key",
+                    "$comment": "Example: {'dash': 'http://example.org/agreementText'}"
+                }
+            }
+        },
+        "abstract": {
+            "type": "string",
+            "title": "Abstract",
+            "description": "The abstract of the article or manuscript being submitted"
+        },
+        "agent_information": {
+            "type": "object",
+            "title": "User agent (browser) information",
+            "description": "Contains the identity and version of the user's browser",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "User agent (browser) name"
+                },
+                "version": {
+                    "type": "string",
+                    "title": "User agent (browser) version"
+                }
+            }
+        },
+        "authors": {
+            "type": "array",
+            "title": "Authors of this article or manuscript",
+            "description": "List of authors and their associated ORCIDS, if available",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "title": "Author",
+                "properties": {
+                    "author": {
+                        "type": "string"
+                    },
+                    "orcid": {
+                        "type": "string"
+                    }
+                },
+		"required": ["author"]
+            }
+        },
+        "doi": {
+            "type": "string",
+            "pattern": "^10\\..+?/.+?$",
+            "title": "DOI of article",
+            "description": "The DOI of the individual article or manuscript submitted"
+        },
+        "Embargo-end-date": {
+            "type": "string",
+            "format": "date",
+            "title": "Embargo end date",
+            "description": "Date at which the article or manuscript may be made public"
+        },
+        "firstAuthorAffiliation": {
+            "type": "string",
+            "title": "First Author Affiliation",
+            "description": "School with which the first author is affiliated",
+            "enum": [
+                "Faculty of Arts and Sciences",
+                "Harvard Graduate School of Design",
+                "Harvard Graduate School of Education",
+                "Harvard Business School",
+                "Harvard Divinity School",
+                "Harvard Kennedy School",
+                "Harvard Law School",
+                "Harvard Medical School",
+                "Harvard T.H. Chan School of Public Health",
+                "Ash Center for Democratic Governance and Innovation",
+                "Berkman Klein Center for Internet & Society",
+                "Harvard University Center for the Environment",
+                "Harvard-China Project on Energy, Economy, and Environment"
+            ]
+        },
+        "journal-NLMTA-ID": {
+            "type": "string",
+            "title": "NTMLA",
+            "description": "NLM identifier for a journal"
+        },
+        "journal-title": {
+            "type": "string",
+            "title": "Journal title",
+            "description": "Title of the journal the individual article or manuscript was submitted to"
+        },
+        "journal-title-short": {
+            "type": "string",
+            "title": "Short journal title",
+            "description": "Short journal title from CrossRef"
+        },
+        "issue": {
+            "type": "string",
+            "title": "Journal issue",
+            "description": "Issue number of the journal this article or manuscript was submitted to"
+        },
+        "issns": {
+            "type": "array",
+            "title": "ISSN information for the manuscript's journal",
+            "description": "List of ISSN numbers with optional publication type",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "title": "ISSN info",
+                "properties": {
+                    "issn": {
+                        "type": "string",
+                        "title": "ISSN "
+                    },
+                    "pubType": {
+                        "type": "string",
+                        "title": "publication type",
+                        "enum": ["Print", "Online"]
+                    }
+                }
+            }
+        },
+        "publisher": {
+            "type": "string",
+            "title": "Publisher",
+            "description": "Publisher of the journal this article or manuscript was submitted to"
+        },
+        "publicationDate": {
+            "type": "string",
+            "title": "Publication Date",
+            "description": "Publication date of the journal or article this manuscript was submitted to",
+            "$comment": "This was formerly date-time format, but that appears too precise for values like 'Summer 2018'"
+        },
+        "publicationType": {
+            "type" : "string",
+            "title": "Publication Type",
+            "default": "Journal",
+            "description": "Type of publication",
+            "enum": ["Journal"]
+        },
+        "title": {
+            "type": "string",
+            "title": "Article / Manuscript Title",
+            "description": "The title of the individual article or manuscript that was submitted"
+        },
+        "under-embargo": {
+            "type": "string",
+            "title": "Under Embargo",
+            "description": "Indicates wither the article or manuscript is under embargo",
+            "$comment": "This should probably be a boolean"
+        },
+        "volume": {
+            "type": "string",
+            "title": "Journal Volume",
+            "description": "journal volume this article or manuscript was published in"
+        }
+    },
+    "dependencies": {
+        "Embargo-end-date": ["under-embargo"]
+    },
+    "options": {
+        "fields": {
+            "title": {
+                "type": "textarea",
+                "label": "Article / Manuscript Title <small class=\"text-muted\">(required)</small>",
+                "placeholder": "Enter the manuscript title",
+                "rows": 2,
+                "cols": 100,
+                "hidden": false,
+                "order": 1
+            },
+            "journal-title": {
+                "type": "text",
+                "label": "Journal Title <small class=\"text-muted\">(required)</small>",
+                "placeholder": "Enter the journal title",
+                "hidden": false,
+                "order": 2
+            },
+            "publicationType": {
+                "type": "select",
+                "label": "Publication Type <small class=\"text-muted\">(optional)</small>",
+                "hidden": false,
+                "order": 3
+            },
+            "journal-NLMTA-ID": {
+                "type": "text",
+                "label": "Journal NLMTA ID <small class=\"text-muted\">(optional)</small>",
+                "placeholder": "nlmta",
+                "order": 4
+            },
+            "volume": {
+                "type": "text",
+                "label": "Volume  <small class=\"text-muted\">(optional)</small>",
+                "placeholder": "Enter the volume",
+                "hidden": false,
+                "order": 5
+            },
+            "issue": {
+                "type": "text",
+                "label": "Issue  <small class=\"text-muted\">(optional)</small>",
+                "placeholder": "Enter issue",
+                "hidden": false,
+                "order": 6
+            },
+            "issns": {
+                "label": "<div>ISSN Information</div><hr/>",
+                "hidden": false,
+                "fieldClass": "",
+                "items": {
+                    "label": "<span class=\"d-none\"></span>",
+                    "fieldClass": "row",
+                    "fields": {
+                        "issn": {
+                            "label": "ISSN",
+                            "fieldClass": "body-text col-6 pull-left "
+                        },
+                        "pubType": {
+                            "label": "Publication Type",
+                            "fieldClass": "body-text col-6 pull-left md-pubtype",
+                            "vertical": false,
+                            "removeDefaultNone": true
+                        }
+                    }
+                },
+                "order": 7
+            },
+            "publisher": {
+                "type": "text",
+                "label": "Publisher <small class=\"text-muted\">(optional)</small>",
+                "placeholder": "Enter the Publisher",
+                "hidden": false,
+                "order": 8
+            },
+            "publicationDate": {
+                "type": "date",
+                "label": "Publication Date  <small class=\"text-muted\">(optional)</small>",
+                "hidden": false,
+                "order": 9
+            },
+            "abstract": {
+                "type": "textarea",
+                "label": "Abstract <small class=\"text-muted\">(optional)</small>",
+                "placeholder": "Enter abstract",
+                "fieldClass": "clearfix",
+                "hidden": false,
+                "order": 10
+            },
+            "authors": {
+                "label": "<div>Authors</div><hr/>",
+                "hidden": false,
+                "items": {
+                    "label": "<span class=\"d-none\"></span>",
+                    "fields": {
+                        "author": {
+                            "label": "Name",
+                            "fieldClass": "body-text col-6 pull-left pl-0"
+                        },
+                        "orcid": {
+                            "label": "ORCiD",
+                            "fieldClass": "body-text col-6 pull-left pr-0"
+                        }
+                    }
+                },
+                "order": 11
+            },
+            "firstAuthorAffiliation": {
+                "type": "select",
+                "label": "First Author Affiliation <small class=\"text-muted\">(required)</small>",
+                "hidden": false,
+                "order": 12
+            },
+            "under-embargo": {
+                "type": "checkbox",
+                "rightLabel": "The material being submitted is published under an embargo.",
+                "fieldClass": "m-0 mt-4",
+                "hidden": false,
+                "order": 13
+            },
+            "Embargo-end-date": {
+                "type": "date",
+                "label": "Embargo End Date",
+                "helper": "<i>After the embargo end date, your submission manuscripts or article can be made public. <b>If this publication is not under embargo, please leave this field blank.<b></i>",
+                "helpersPosition": "above",
+                "placeholder": "dd/mm/yyyy",
+                "validate": true,
+                "inputType": "date",
+                "fieldClass": "date-time-picker",
+                "picker": {
+                    "format": "MM/DD/YY",
+                    "allowInputToggle": true
+                },
+                "order": 14,
+                "dependencies": {
+                    "under-embargo": true
+                }
+            }
+        }
+    }
+}

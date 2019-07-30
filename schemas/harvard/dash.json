@@ -1,0 +1,47 @@
+{
+    "title": "DASH schema",
+    "description": "Harvard DASH-specific metadata requirements",
+    "$id": "https://oa-pass.github.io/metadata-schemas/harvard/dash.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+        "form": {
+            "title": "Harvard - DASH <br><p class='lead text-muted'>Deposit requirements for Harvard's institutional repository DASH</p>",
+            "type": "object",
+            "required": [
+                "authors",
+                "publicationDate",
+                "title",
+                "firstAuthorAffiliation"
+            ],
+            "properties": {
+                "authors": {
+                    "$ref": "global.json#/properties/authors"
+                },
+                "title": {
+                    "$ref": "global.json#/properties/title"
+                },
+                "firstAuthorAffiliation": {
+                    "$ref": "global.json#/properties/firstAuthorAffiliation"
+                },
+                "publicationDate": {
+                    "$ref": "global.json#/properties/publicationDate"
+                },
+                "publicationType": {
+                    "$ref": "global.json#/properties/publicationType"
+                }
+            }
+        },
+        "options": {
+            "$ref": "global.json#/options"
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "global.json#"
+        },
+        {
+            "$ref": "#/definitions/form"
+        }
+    ]
+}

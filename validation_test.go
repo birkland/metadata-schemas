@@ -11,24 +11,43 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-const schemaDir = "schemas/jhu"
+const (
+	jhuSchemaDir     = "schemas/jhu"
+	harvardSchemaDir = "schemas/harvard"
+)
 
-func TestSchemaValidity(t *testing.T) {
-	schemaMap := loadSchemas(t)
+// Merged schemas between institutions may conflict, so we need to do them separately
+func TestJHUSchemas(t *testing.T) {
+	jhuSchemas := loadSchemas(t, jhuSchemaDir, true)
 
-	cases := map[string]bool{
-		"examples/jhu/full.json":                         true,
-		"testdata/valid/nlmta-but-no-pubtype.json":       true,
-		"testdata/valid/no-nlmta-but-has-a-pubtype.json": true,
-		"testdata/invalid/no-nlmta-or-pubtype.json":      false,
-	}
+	cases := map[string]bool{}
 
+	addCases(t, cases, "examples/jhu", true)
+	addCases(t, cases, "testdata/valid/jhu", true)
+	addCases(t, cases, "testdata/invalid/jhu", false)
+
+	validateSchemas(t, jhuSchemas, cases)
+}
+
+func TestHarvardSchemas(t *testing.T) {
+	harvardSchemas := loadSchemas(t, harvardSchemaDir, true)
+
+	cases := map[string]bool{}
+
+	addCases(t, cases, "examples/harvard", true)
+	addCases(t, cases, "testdata/valid/harvard", true)
+	addCases(t, cases, "testdata/invalid/harvard", false)
+
+	validateSchemas(t, harvardSchemas, cases)
+}
+
+func validateSchemas(t *testing.T, schemas jsonschema.Map, cases map[string]bool) {
 	for filename, shouldBeValid := range cases {
 		filename := filename
 		shouldBeValid := shouldBeValid
 		t.Run(filename, func(t *testing.T) {
 			var hasExpectedFailure bool
-			for id, schema := range schemaMap {
+			for id, schema := range schemas {
 				toTest := gojsonschema.NewGoLoader(schema)
 
 				result, err := gojsonschema.Validate(toTest, loadTestSchema(t, filename))
@@ -63,19 +82,9 @@ func loadTestSchema(t *testing.T, filename string) gojsonschema.JSONLoader {
 	return gojsonschema.NewBytesLoader(body)
 }
 
-func loadSchemas(t *testing.T) jsonschema.Map {
+func loadSchemas(t *testing.T, dir string, merge bool) jsonschema.Map {
 
-	dir, err := ioutil.ReadDir(schemaDir)
-	if err != nil {
-		t.Fatalf("Could not list schema directory!")
-	}
-
-	var schemaFiles []string
-	for _, dirent := range dir {
-		if dirent.Mode().IsRegular() && strings.HasSuffix(dirent.Name(), ".json") {
-			schemaFiles = append(schemaFiles, filepath.Join(schemaDir, dirent.Name()))
-		}
-	}
+	schemaFiles := findJSONDocs(t, dir)
 
 	schemaMap, err := jsonschema.Load(schemaFiles)
 	if err != nil {
@@ -92,12 +101,36 @@ func loadSchemas(t *testing.T) jsonschema.Map {
 		t.Fatalf("Error dereferencing schemas %+v", err)
 	}
 
-	// Finally, add a union schema that merges them all (making sure that validations are expected against that too)
-	merged, err := jsonschema.Merge(schemas)
-	if err != nil {
-		t.Fatalf("Error merging schemas: %+v", err)
+	if merge {
+		// Finally, add a union schema that merges them all (making sure that validations are expected against that too)
+		merged, err := jsonschema.Merge(schemas)
+		if err != nil {
+			t.Fatalf("Error merging schemas: %+v", err)
+		}
+		schemaMap["merged"] = merged
 	}
-	schemaMap["merged"] = merged
 
 	return schemaMap
+}
+
+func addCases(t *testing.T, cases map[string]bool, fromDir string, shouldValidate bool) {
+	for _, path := range findJSONDocs(t, fromDir) {
+		cases[path] = shouldValidate
+	}
+}
+
+func findJSONDocs(t *testing.T, dir string) []string {
+	var paths []string
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if strings.HasSuffix(path, "json") {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		t.Fatalf("Walk for schemas failed: %+v", err)
+	}
+
+	return paths
 }

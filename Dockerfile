@@ -7,7 +7,8 @@ COPY . .
 RUN CGO_ENABLED=0 go build ./cmd/pass-schema-service
 
 FROM alpine:3.9
-COPY --from=builder /root/pass-schema-service /root/schemas/* /root/scripts /
+COPY --from=builder /root/pass-schema-service /root/scripts /
+COPY --from=builder /root/schemas /schemas
 
 RUN chmod 700 /entrypoint.sh
 

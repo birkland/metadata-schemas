@@ -1,0 +1,42 @@
+{
+    "$schema": "https://oa-pass.github.io/metadata-schemas/harvard/global.json",
+    "title": "The title of the article",
+    "journal-title": "A Terrific Journal",
+    "volume": "2",
+    "issue": "4",
+    "issns": [
+        {
+            "issn": "1234-5678",
+            "pubType": "Online"
+        },
+        {
+            "issn": "1234-5678x"
+        }
+    ],
+    "publisher": "Journal Publisher Inc",
+    "publicationDate": "2018",
+    "publicationType": "Journal",
+    "abstract": "This is the abstract of the article.",
+    "authors": [
+        {
+            "author": "Bob Author"
+        },
+        {
+            "author": "Jane Writer",
+            "orcid": "https://orcid.org/1234-5678-9087-4453"
+        }
+    ],
+    "under-embargo": "true",
+    "Embargo-end-date": "2019-01-18",
+    "agent_information": {
+        "name": "Chrome",
+        "version": "704583"
+    },
+    "agreements": {
+        "JScholarship": "This is the text I agreed to",
+        "NIHMS": "http://example.org/policies/nihms.html"
+    },
+    "doi": "10.123/foo.bar.xyz",
+    "journal-NLMTA-ID": "atj",
+    "journal-title-short": "ATJ"
+}

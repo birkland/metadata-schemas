@@ -1,0 +1,55 @@
+{
+    "title": "JHU common schema",
+    "description": "Enumerates the common properies required by most repositories",
+    "$id": "https://oa-pass.github.io/metadata-schemas/harvard/common.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+        "form": {
+            "type": "object",
+            "title": "Publication Details <br><p class='lead text-muted'>Please provide additional information about your article/manuscript below. If DOI was provided in the initial step of the submission, the metadata associated with that DOI was found and used to prepopulatethis form. </p> <p class='lead text-muted'> <i class='glyphicon glyphicon-info-sign'></i> Fields that are not editable were populated using metadata associated with the provided DOI. </p>",
+            "$comment": "These properties are intended to be displayed in an Alpaca form",
+            "properties": {
+                "title": {
+                    "$ref": "global.json#/properties/title"
+                },
+                "journal-title": {
+                    "$ref": "global.json#/properties/journal-title"
+                },
+                "volume": {
+                    "$ref": "global.json#/properties/volume"
+                },
+                "issue": {
+                    "$ref": "global.json#/properties/issue"
+                },
+                "issns": {
+                    "$ref": "global.json#/properties/issns"
+                },
+                "publisher": {
+                    "$ref": "global.json#/properties/publisher"
+                },
+                "publicationDate": {
+                    "$ref": "global.json#/properties/publicationDate"
+                },
+                "abstract": {
+                    "$ref": "global.json#/properties/abstract"
+                },
+                "authors": {
+                    "$ref": "global.json#/properties/authors"
+                },
+                "under-embargo": {
+                    "$ref": "global.json#/properties/under-embargo"
+                },
+                "Embargo-end-date": {
+                    "$ref": "global.json#/properties/Embargo-end-date"
+                }
+            },
+            "dependencies": {
+                "Embargo-end-date": ["under-embargo"]
+            },
+            "options": {
+                "$ref": "global.json#/options"
+            }
+        }
+    }
+}

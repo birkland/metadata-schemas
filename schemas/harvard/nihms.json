@@ -1,0 +1,75 @@
+{
+    "title": "NIHMS schema",
+    "description": "NIHMS-specific metadata requirements",
+    "$id": "https://oa-pass.github.io/metadata-schemas/harvard/nihms.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "definitions": {
+        "form": {
+            "title": "NIH Manuscript Submission System (NIHMS) <br><p class='lead text-muted'>The following metadata fields will be part of the NIHMS submission.</p>",
+            "type": "object",
+            "properties": {
+                "journal-NLMTA-ID": {
+                    "$ref": "global.json#/properties/journal-NLMTA-ID"
+                },
+                "issns": {
+                    "$ref": "global.json#/properties/issns"
+                }
+            }
+        },
+        "prerequisites": {
+            "anyOf": [
+                {"$ref": "#/definitions/nlmta_present"},
+                {"$ref": "#/definitions/issn_present"}
+            ]
+        },
+        "issn_present": {
+            "type": "object",
+            "properties": {
+                "issns": {
+                    "type": "array",
+                    "contains": {
+                        "type": "object",
+                        "required": [
+                            "issn",
+                            "pubType"
+                        ],
+                        "properties": {
+                            "issn": {
+                                "type": "string"
+                            },
+                            "pubType": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "nlmta_present": {
+            "type": "object",
+            "required": [
+                "journal-NLMTA-ID"
+            ],
+            "properties": {
+                "journal-NLMTA-ID": {
+                    "$ref": "global.json#/properties/journal-NLMTA-ID"
+                }
+            }
+        },
+        "options": {
+            "$ref": "global.json#/options"
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "global.json#"
+        },
+        {
+            "$ref": "#/definitions/prerequisites"
+        },
+        {
+            "$ref": "#/definitions/form"
+        }
+    ]
+}
